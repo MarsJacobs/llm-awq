@@ -79,7 +79,7 @@ def run_awq(
         "scale": [],
         "clip": [],
     }
-
+    
     # solve layer by layer
     for i in tqdm.tqdm(range(len(layers)), desc="Running AWQ..."):
         layer = layers[i]

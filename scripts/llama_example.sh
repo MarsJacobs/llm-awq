@@ -1,25 +1,69 @@
-MODEL=llama-7b
+export HF_DATASETS_CACHE="/home/ms/hf_cache"
 
+MODEL=llama_hf_ms/llama-7b-hf
+
+for bit in 3 4
+do
 # run AWQ search (optional; we provided the pre-computed results)
-python -m awq.entry --model_path /dataset/llama-hf/$MODEL \
-    --w_bit 4 --q_group_size 128 \
-    --run_awq --dump_awq awq_cache/$MODEL-w4-g128.pt
+python -m awq.entry --model_path $MODEL \
+    --w_bit ${bit} --q_group_size 128 \
+    --run_awq --dump_awq awq_cache/llama-7b-hf-ms-w${bit}-g128.pt
 
 # evaluate the AWQ quantize model (simulated pseudo quantization)
-python -m awq.entry --model_path /dataset/llama-hf/$MODEL \
-    --tasks wikitext \
-    --w_bit 4 --q_group_size 128 \
-    --load_awq awq_cache/$MODEL-w4-g128.pt \
+python -m awq.entry --model_path $MODEL \
+    --tasks piqa,hellaswag,winogrande,arc_easy \
+    --w_bit ${bit} --q_group_size 128 \
+    --load_awq awq_cache/llama-7b-hf-ms-w${bit}-g128.pt \
     --q_backend fake
+done
 
-# generate real quantized weights (w4)
-python -m awq.entry --model_path /dataset/llama-hf/$MODEL \
-    --w_bit 4 --q_group_size 128 \
-    --load_awq awq_cache/$MODEL-w4-g128.pt \
-    --q_backend real --dump_quant quant_cache/$MODEL-w4-g128-awq.pt
+MODEL=llama_hf_ms/llama-13b-hf
 
-# load and evaluate the real quantized model (smaller gpu memory usage)
-python -m awq.entry --model_path /dataset/llama-hf/$MODEL \
-    --tasks wikitext \
-    --w_bit 4 --q_group_size 128 \
-    --load_quant quant_cache/$MODEL-w4-g128-awq.pt
+for bit in 3 4
+do
+# run AWQ search (optional; we provided the pre-computed results)
+python -m awq.entry --model_path $MODEL \
+    --w_bit ${bit} --q_group_size 128 \
+    --run_awq --dump_awq awq_cache/llama-13b-hf-ms-w${bit}-g128.pt
+
+# evaluate the AWQ quantize model (simulated pseudo quantization)
+python -m awq.entry --model_path $MODEL \
+    --tasks piqa,hellaswag,winogrande,arc_easy \
+    --w_bit ${bit} --q_group_size 128 \
+    --load_awq awq_cache/llama-13b-hf-ms-w${bit}-g128.pt \
+    --q_backend fake
+done
+
+MODEL=llama_hf_ms/llama-30b-hf
+
+for bit in 3 4
+do
+# run AWQ search (optional; we provided the pre-computed results)
+python -m awq.entry --model_path $MODEL \
+    --w_bit ${bit} --q_group_size 128 \
+    --run_awq --dump_awq awq_cache/llama-30b-hf-ms-w${bit}-g128.pt
+
+# evaluate the AWQ quantize model (simulated pseudo quantization)
+python -m awq.entry --model_path $MODEL \
+    --tasks piqa,hellaswag,winogrande,arc_easy \
+    --w_bit ${bit} --q_group_size 128 \
+    --load_awq awq_cache/llama-30b-hf-ms-w${bit}-g128.pt \
+    --q_backend fake
+done
+
+MODEL=llama_hf_ms/llama-65b-hf
+
+for bit in 3 4
+do
+# run AWQ search (optional; we provided the pre-computed results)
+python -m awq.entry --model_path $MODEL \
+    --w_bit ${bit} --q_group_size 128 \
+    --run_awq --dump_awq awq_cache/llama-65b-hf-ms-w${bit}-g128.pt
+
+# evaluate the AWQ quantize model (simulated pseudo quantization)
+python -m awq.entry --model_path $MODEL \
+    --tasks piqa,hellaswag,winogrande,arc_easy \
+    --w_bit ${bit} --q_group_size 128 \
+    --load_awq awq_cache/llama-65b-hf-ms-w${bit}-g128.pt \
+    --q_backend fake
+done

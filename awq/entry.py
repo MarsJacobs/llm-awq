@@ -9,10 +9,12 @@ from awq.utils.parallel import auto_parallel
 from awq.quantize.pre_quant import run_awq, apply_awq
 from awq.quantize.quantizer import pseudo_quantize_model_weight, real_quantize_model_weight
 from awq.utils.lm_eval_adaptor import LMEvalAdaptor
+from awq.utils.lm_mmlu import mmlu_eval
 
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--model_path', type=str, help='path of the hf model')
+parser.add_argument('--mmlu_dir', type=str, default=None, help='path of the mmlu dataset')
 parser.add_argument('--batch_size', type=int, default=1, help='batch size')
 parser.add_argument("--tasks", default=None, type=str)
 parser.add_argument("--output_path", default=None, type=str)
@@ -57,14 +59,13 @@ print("Quantization config:", q_config)
 # build model and tokenizer
 
 def build_model_and_enc(model_path):
-    if not os.path.exists(model_path):  # look into ssd
-        raise FileNotFoundError(f"{model_path} not found!")
+    # if not os.path.exists(model_path):  # look into ssd
+    #     raise FileNotFoundError(f"{model_path} not found!")
     print(f"* Building model {model_path}")
 
     # all hf model
     config = AutoConfig.from_pretrained(model_path)
     enc = AutoTokenizer.from_pretrained(model_path, use_fast=False)
-
     if args.load_quant:  # directly load quantized weights
         # no need to really load the fp16 weights... just to get the model structure
         print("Loading pre-computed quantized weights...")
@@ -84,7 +85,6 @@ def build_model_and_enc(model_path):
 
         model = AutoModelForCausalLM.from_pretrained(
             model_path, config=config, **kwargs)
-
         if args.run_awq:
             awq_results = run_awq(
                 model, enc,
@@ -136,9 +136,14 @@ def main():
     # a hack here to auto set model group
     model, enc = build_model_and_enc(args.model_path)
 
-    lm_eval_model = LMEvalAdaptor(args.model_path, model, enc, args.batch_size)
+    if args.mmlu_dir is not None:
+        
+        mmlu_eval(model, args.mmlu_dir, args, enc)
 
     if args.tasks is not None:
+        
+        lm_eval_model = LMEvalAdaptor(args.model_path, model, enc, args.batch_size)
+        
         task_names = args.tasks.split(",")
 
         results = evaluator.simple_evaluate(
