@@ -52,16 +52,49 @@ def pseudo_quantize_tensor(w, n_bit=8,
     else:
         return w
 
+def pseudo_quantize_tensor_minmag(w, n_bit=8,                                                    
+              zero_point=True, q_group_size=-1,                                         
+              inplace=False,                                                   
+              get_scale_zp=False                                                 
+              ):                                        
+                
+    org_w_shape = w.shape                                                           
+    if q_group_size > 0:                                                           
+        assert org_w_shape[-1] % q_group_size == 0                                              
+        w = w.reshape(-1, q_group_size)                                                    
+    assert w.dim() == 2                                                            
+    max_val = w.amax(dim=1, keepdim=True)                                                   
+    min_val = w.amin(dim=1, keepdim=True)                                                   
+    max_int = 2 ** n_bit - 3                                                         
+    min_int = 0                                                                
+    scales = (max_val - min_val).clamp(min=1e-5) / max_int                                          
+    zeros = (-torch.round(min_val / scales)).clamp_(min_int, max_int)                                     
+    gammas = scales*0.5                                                            
+                                                                        
+    assert torch.isnan(scales).sum() == 0                                                   
+    assert torch.isnan(gammas).sum() == 0
+    dq = (torch.clamp(torch.round(w / scales) +                                                
+            zeros, min_int, max_int) - zeros) * scales                                        
+    dq = torch.where(w.abs()<((gammas+scales)/2),torch.sign(w)*gammas,dq)
+    dq = torch.where(w.abs()<((gammas)/2),torch.zeros_like(dq),dq)
+                                                                        
+    assert torch.isnan(dq).sum() == 0
+    dq = dq.reshape(org_w_shape)                                                       
+    
+    return dq
+
+
 @torch.no_grad()
 def pseudo_quantize_model_weight(
     model, w_bit, q_config,
-):    
+):   
+    quantize_tensor = pseudo_quantize_tensor if q_config["q_format"] == "uniform" else pseudo_quantize_tensor_minmag
     from .pre_quant import get_blocks, get_named_linears
     layers = get_blocks(model)
     for i in tqdm(range(len(layers)), desc="pseudo weight quantization..."):
         named_linears = get_named_linears(layers[i])
         for n, m in named_linears.items():
-            m.weight.data = pseudo_quantize_tensor(m.weight.data, n_bit=w_bit, **q_config)
+            m.weight.data = quantize_tensor(m.weight.data, n_bit=w_bit, **q_config)
 
 
 @torch.no_grad()

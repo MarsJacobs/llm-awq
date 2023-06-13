@@ -1,4 +1,5 @@
 .DS_Store
+mmlu_eval_output
 
 data/
 # Byte-compiled / optimized / DLL files

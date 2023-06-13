@@ -11,7 +11,6 @@ from awq.quantize.quantizer import pseudo_quantize_model_weight, real_quantize_m
 from awq.utils.lm_eval_adaptor import LMEvalAdaptor
 from awq.utils.lm_mmlu import mmlu_eval
 
-
 parser = argparse.ArgumentParser()
 parser.add_argument('--model_path', type=str, help='path of the hf model')
 parser.add_argument('--mmlu_dir', type=str, default=None, help='path of the mmlu dataset')
@@ -43,6 +42,9 @@ parser.add_argument('--dump_awq', type=str, default=None,
                     help="save the awq search results")
 parser.add_argument('--load_awq', type=str, default=None,
                     help="load the awq search results")
+parser.add_argument('--q_format', type=str, default="uniform",
+                    help="Quantization format", choices=["uniform", "minmag"])
+    
 args = parser.parse_args()
 
 if args.auto_parallel:
@@ -52,7 +54,7 @@ if args.auto_parallel:
 q_config = {
     "zero_point": not args.no_zero_point,  # by default True
     "q_group_size": args.q_group_size,  # whether to use group quantization
-
+    "q_format": args.q_format
 }
 print("Quantization config:", q_config)
 
@@ -153,7 +155,6 @@ def main():
             no_cache=True,
             num_fewshot=args.num_fewshot,
         )
-
         print(evaluator.make_table(results))
 
         if args.output_path is not None:
