@@ -9,7 +9,7 @@ LM_HEAD_KEYWORDS = ["lm_head", "embed_out", "output"]
 
 # core quantization method (simulated quantization)
 def pseudo_quantize_tensor(w, n_bit=8,
-                           zero_point=True, q_group_size=-1,
+                           zero_point=True, q_group_size=-1, q_format="uniform",
                            inplace=False,
                            get_scale_zp=False
                            ):
@@ -53,7 +53,7 @@ def pseudo_quantize_tensor(w, n_bit=8,
         return w
 
 def pseudo_quantize_tensor_minmag(w, n_bit=8,                                                    
-              zero_point=True, q_group_size=-1,                                         
+              zero_point=True, q_group_size=-1, q_format="uniform",
               inplace=False,                                                   
               get_scale_zp=False                                                 
               ):                                        

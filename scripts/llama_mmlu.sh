@@ -3,7 +3,7 @@ export HF_DATASETS_CACHE="/home/ms/hf_cache"
 MODEL=llama_hf_ms/llama-13b-hf
 bit=$2
 
-python -m awq.entry --model_path $MODEL \
+CUDA_VISIBLE_DEVICES=$1 python -m awq.entry --model_path $MODEL \
     --w_bit ${bit} --q_group_size 128 --q_format minmag \
     --run_awq --dump_awq awq_cache/llama-13b-hf-ms-w${bit}-g128-minmag.pt
 
