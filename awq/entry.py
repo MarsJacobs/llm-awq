@@ -158,7 +158,8 @@ def main():
         print(evaluator.make_table(results))
 
         if args.output_path is not None:
-            os.makedirs(os.path.dirname(args.output_path), exist_ok=True)
+            os.makedirs(os.path.dirname("awq_evals"), exist_ok=True)
+            args.output_path = os.path.join("awq_evals", args.output_path + ".json")
             # otherwise cannot save
             results["config"]["model"] = args.model_path
             with open(args.output_path, "w") as f:

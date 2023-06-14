@@ -6,5 +6,5 @@ bit=$2
 
 # evaluate the AWQ quantize model (simulated pseudo quantization)
 CUDA_VISIBLE_DEVICES=$1 python -m awq.entry --model_path $MODEL \
-    --mmlu_dir mmlu_data \
-    --output_path llama-${size}b-fp-${format}-mmlu
+    --tasks piqa,hellaswag,winogrande,arc_easy \
+    --output_path llama-${size}b-fp-${format}-qa

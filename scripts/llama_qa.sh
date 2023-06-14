@@ -11,8 +11,8 @@ CUDA_VISIBLE_DEVICES=$1 python -m awq.entry --model_path $MODEL \
 
 # evaluate the AWQ quantize model (simulated pseudo quantization)
 CUDA_VISIBLE_DEVICES=$1 python -m awq.entry --model_path $MODEL \
-    --mmlu_dir mmlu_data \
+    --tasks piqa,hellaswag,winogrande,arc_easy \
     --w_bit ${bit} --q_group_size 128 --q_format ${format} \
     --load_awq awq_cache/llama-${size}b-hf-ms-w${bit}-g128-${format}.pt \
     --q_backend fake \
-    --output_path llama-${size}b-${bit}bit-${format}-mmlu
+    --output_path llama-${size}b-${bit}bit-${format}-qa
