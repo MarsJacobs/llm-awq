@@ -38,6 +38,8 @@ parser.add_argument('--load_quant', type=str, default=None,
 # apply/save/load awq
 parser.add_argument('--run_awq', action='store_true',
                     help="perform awq search process")
+parser.add_argument('--mse_range', action='store_true',
+                    help="perform awq search process (clip)")
 parser.add_argument('--dump_awq', type=str, default=None,
                     help="save the awq search results")
 parser.add_argument('--load_awq', type=str, default=None,
@@ -91,7 +93,7 @@ def build_model_and_enc(model_path):
             awq_results = run_awq(
                 model, enc,
                 w_bit=args.w_bit, q_config=q_config,
-                n_samples=128, seqlen=512,
+                n_samples=128, seqlen=512, mse_range=args.mse_range
             )
             if args.dump_awq:
                 torch.save(awq_results, args.dump_awq)

@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from .quantizer import pseudo_quantize_tensor
+from .quantizer import pseudo_quantize_tensor, pseudo_quantize_tensor_minmag
 import gc
 
 __all__ = ["auto_clip_block"]
@@ -12,6 +12,9 @@ def auto_clip_layer(w, input_feat, n_bit, q_config,
                     n_grid=20,
                     max_shrink=0.5,
                     n_sample_token=512):
+    
+    quantize_tensor = pseudo_quantize_tensor if q_config["q_format"] == "uniform" else pseudo_quantize_tensor_minmag              
+    
     assert w.dim() == 2
     org_w_shape = w.shape
     # w           [co, ci]      -> [co, 1, n_group, group size]
@@ -41,7 +44,7 @@ def auto_clip_layer(w, input_feat, n_bit, q_config,
             max_val = org_max_val * (1 - i_s / n_grid)
             min_val = - max_val
             cur_w = torch.clamp(w, min_val, max_val)
-            q_w = pseudo_quantize_tensor(cur_w, n_bit=n_bit, **q_config)
+            q_w = quantize_tensor(cur_w, n_bit=n_bit, **q_config)
             cur_out = (input_feat * q_w).sum(dim=-1)
 
             # co, 1, n_group, 1

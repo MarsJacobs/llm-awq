@@ -87,7 +87,7 @@ def pseudo_quantize_tensor_minmag(w, n_bit=8,
 @torch.no_grad()
 def pseudo_quantize_model_weight(
     model, w_bit, q_config,
-):   
+):  
     quantize_tensor = pseudo_quantize_tensor if q_config["q_format"] == "uniform" else pseudo_quantize_tensor_minmag
     from .pre_quant import get_blocks, get_named_linears
     layers = get_blocks(model)

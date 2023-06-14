@@ -70,10 +70,12 @@ def scale_fc_fc(fc1, fc2, scales):
 def auto_scale_block(module, module_kwargs,
                      w_bit, q_config,
                      input_feat):
-    from .quantizer import pseudo_quantize_tensor
+    from .quantizer import pseudo_quantize_tensor, pseudo_quantize_tensor_minmag
+    quantize_tensor = pseudo_quantize_tensor if q_config["q_format"] == "uniform" else pseudo_quantize_tensor_minmag
+    
     # firstly, get the weight quantize function
     if w_bit is not None:
-        def w_quantize_func(p): return pseudo_quantize_tensor(
+        def w_quantize_func(p): return quantize_tensor(
             p, n_bit=w_bit, **q_config,
         ).detach()
     else:
