@@ -144,14 +144,12 @@ def main():
     model, enc = build_model_and_enc(args.model_path)
 
     if args.tasks == "wikitext":
-
         model.seqlen=2048
         testloader = get_loaders(
                 args.tasks, model=model, seqlen=model.seqlen, train=False, enc=enc
             )
         ppl_score = llama_eval(model, testloader, dev=model.device)
         print(f"wiki PPL : {ppl_score}")
-        
         return 
 
     if args.mmlu_dir is not None:

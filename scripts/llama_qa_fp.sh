@@ -1,7 +1,7 @@
 export HF_DATASETS_CACHE="/home/ms/hf_cache"
 
 size=$2
-MODEL=llama_hf_ms/llama-${size}b-hf
+MODEL=huggyllama/llama-${size}b
 
 CUDA_VISIBLE_DEVICES=$1 python -m awq.entry --model_path $MODEL \
     --tasks wikitext \
