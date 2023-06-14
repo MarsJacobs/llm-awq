@@ -153,7 +153,7 @@ def mmlu_eval(model, data_dir, args, tokenizer):
     print("Average accuracy: {:.3f}".format(weighted_acc))
 
     if args.output_path is not None:
-        os.makedirs(os.path.dirname(args.output_path), exist_ok=True)
+        os.makedirs(args.output_path, exist_ok=True)
         results["model"] = args.model_path
         results_file = args.output_path
         with open(results_file, "w") as f:

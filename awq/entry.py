@@ -1,5 +1,6 @@
 from lm_eval import evaluator, tasks
 from transformers import AutoModelForCausalLM, AutoTokenizer, AutoConfig, AutoModelForSeq2SeqLM
+from transformers import LlamaConfig, LlamaForCausalLM
 import torch
 import argparse
 import os
@@ -10,6 +11,7 @@ from awq.quantize.pre_quant import run_awq, apply_awq
 from awq.quantize.quantizer import pseudo_quantize_model_weight, real_quantize_model_weight
 from awq.utils.lm_eval_adaptor import LMEvalAdaptor
 from awq.utils.lm_mmlu import mmlu_eval
+from awq.utils.wiki_loader import *
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--model_path', type=str, help='path of the hf model')
@@ -89,6 +91,7 @@ def build_model_and_enc(model_path):
 
         model = AutoModelForCausalLM.from_pretrained(
             model_path, config=config, **kwargs)
+
         if args.run_awq:
             awq_results = run_awq(
                 model, enc,
@@ -139,6 +142,17 @@ def main():
 
     # a hack here to auto set model group
     model, enc = build_model_and_enc(args.model_path)
+
+    if args.tasks == "wikitext":
+
+        model.seqlen=2048
+        testloader = get_loaders(
+                args.tasks, model=model, seqlen=model.seqlen, train=False, enc=enc
+            )
+        ppl_score = llama_eval(model, testloader, dev=model.device)
+        print(f"wiki PPL : {ppl_score}")
+        
+        return 
 
     if args.mmlu_dir is not None:
         
