@@ -1,6 +1,7 @@
 .DS_Store
 mmlu_eval_output
-
+awq_evals
+gptq_outputs
 data/
 # Byte-compiled / optimized / DLL files
 __pycache__/
